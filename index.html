@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spelling Test</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eeede8;
+  --text: #1a1a18; --text2: #6b6a65; --text3: #9b9a95;
+  --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+  --radius: 12px; --radius-sm: 8px;
+  --green: #1D9E75; --red: #D85A30; --blue: #378add;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+    --text: #f0efe8; --text2: #9b9a93; --text3: #6b6a63;
+    --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+  }
+}
+body {
+  font-family: var(--font); background: var(--bg2); color: var(--text);
+  min-height: 100vh; display: flex; align-items: flex-start;
+  justify-content: center; padding: 2rem 1rem 4rem;
+}
+.app { width: 100%; max-width: 600px; }
+.header { text-align: center; margin-bottom: 2rem; }
+.header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+.header p { font-size: 14px; color: var(--text2); margin-top: 6px; }
+.panel {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem;
+}
+.panel-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text3); margin-bottom: 12px;
+}
+input[type=text], select, textarea {
+  width: 100%; padding: 9px 12px; font-size: 15px; font-family: var(--font);
+  background: var(--bg2); color: var(--text); border: 0.5px solid var(--border2);
+  border-radius: var(--radius-sm); outline: none; transition: border-color 0.15s;
+}
+input[type=text]:focus, select:focus, textarea:focus { border-color: var(--blue); }
+textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row input { flex: 1; }
+.btn {
+  padding: 9px 16px; font-size: 14px; font-weight: 500; font-family: var(--font);
+  border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #185fa5; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: var(--bg3); color: var(--text2); border: 0.5px solid var(--border2); }
+.btn-ghost:hover { background: var(--bg2); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { opacity: 0.85; }
+.btn-lg { padding: 13px 24px; font-size: 16px; width: 100%; }
+.word-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 28px; }
+.tag {
+  display: flex; align-items: center; gap: 6px; padding: 4px 10px;
+  background: var(--bg3); border: 0.5px solid var(--border2);
+  border-radius: 20px; font-size: 13px; color: var(--text);
+}
+.tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; padding: 0; line-height: 1; }
+.tag button:hover { color: var(--red); }
+.saved-lists { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.list-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 13px; cursor: pointer;
+  border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text2);
+  transition: all 0.15s;
+}
+.list-chip:hover, .list-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.list-chip-del { margin-left: 6px; opacity: 0.6; }
+.list-chip-del:hover { opacity: 1; }
+.settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.settings-row label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
+.word-count { font-size: 12px; color: var(--text3); margin-top: 6px; }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.tab {
+  padding: 6px 14px; font-size: 13px; border-radius: 20px; cursor: pointer;
+  background: none; border: 0.5px solid var(--border2); color: var(--text2); font-family: var(--font);
+}
+.tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* screens */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* test screen */
+.test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.test-progress { font-size: 13px; color: var(--text2); }
+.test-actions { display: flex; gap: 8px; }
+.progress-bar { height: 5px; background: var(--bg3); border-radius: 3px; margin-bottom: 2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--blue); border-radius: 3px; transition: width 0.3s ease; }
+.word-display {
+  text-align: center; padding: 3rem 2rem; background: var(--bg);
+  border: 0.5px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.word-display .word-num { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.listen-btn {
+  font-size: 44px; background: none; border: none; cursor: pointer;
+  margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;
+  transition: transform 0.15s;
+}
+.listen-btn:hover { transform: scale(1.1); }
+.hint { font-size: 13px; color: var(--text3); }
+.answer-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+.answer-row input { flex: 1; font-size: 18px; padding: 12px 16px; }
+.answer-row input.correct { border-color: var(--green); background: #edf7f2; }
+.answer-row input.wrong { border-color: var(--red); background: #fdf0ec; }
+.feedback {
+  text-align: center; font-size: 15px; font-weight: 500;
+  min-height: 24px; margin-bottom: 1rem;
+}
+.feedback.correct { color: var(--green); }
+.feedback.wrong { color: var(--red); }
+#next-btn { display: none; }
+
+/* confirm bar */
+.confirm-bar {
+  display: none; background: var(--bg3); border: 0.5px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 1rem;
+  align-items: center; justify-content: space-between; gap: 10px;
+}
+.confirm-bar.show { display: flex; }
+.confirm-bar p { font-size: 14px; color: var(--text); }
+.confirm-bar .cbtn { display: flex; gap: 8px; }
+
+/* results */
+.score-big { text-align: center; font-size: 56px; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+.score-msg { text-align: center; font-size: 15px; color: var(--text2); margin-bottom: 2rem; }
+.result-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; }
+.result-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-sm);
+}
+.ri-icon { font-size: 18px; }
+.ri-word { font-weight: 600; flex: 1; }
+.ri-answer { font-size: 13px; color: var(--text2); }
+
+/* photo */
+.photo-area {
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 2rem; text-align: center; cursor: pointer;
+  color: var(--text2); font-size: 14px; transition: border-color 0.15s;
+}
+.photo-area:hover { border-color: var(--blue); }
+.photo-preview { max-width: 100%; border-radius: var(--radius-sm); margin-top: 12px; display: none; }
+.api-key-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.api-key-row input { flex: 1; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>✏️ Spelling Test</h1>
+    <p>Practice spelling with text-to-speech · 스펠링 테스트</p>
+  </div>
+
+  <!-- Setup Screen -->
+  <div id="setup-screen" class="screen active">
+
+    <!-- Saved Lists -->
+    <div class="panel" id="saved-lists-panel" style="display:none">
+      <div class="panel-title">Saved Lists · 저장된 목록</div>
+      <div class="saved-lists" id="saved-lists-bar"></div>
+    </div>
+
+    <!-- Word Input -->
+    <div class="panel">
+      <div class="panel-title">Word List · 단어 목록</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('manual')">Type words · 직접 입력</button>
+        <button class="tab" onclick="switchTab('paste')">Paste list · 붙여넣기</button>
+        <button class="tab" onclick="switchTab('photo')">Photo · 사진</button>
+      </div>
+
+      <!-- Manual tab -->
+      <div class="tab-panel active" id="tab-manual">
+        <div class="row">
+          <input type="text" id="word-input" placeholder="Type a word and press Enter · 단어 입력 후 엔터" onkeydown="handleWordKey(event)" />
+          <button class="btn btn-primary" onclick="addWord()">Add</button>
+        </div>
+        <div class="word-tags" id="word-tags"></div>
+      </div>
+
+      <!-- Paste tab -->
+      <div class="tab-panel" id="tab-paste">
+        <textarea id="paste-input" placeholder="Paste words here — one per line, comma-separated, or space-separated&#10;단어를 붙여넣기 하세요 (줄바꿈, 쉼표, 또는 공백으로 구분)"></textarea>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="importPaste()">Import · 가져오기</button>
+        <div class="word-tags" id="paste-word-tags"></div>
+      </div>
+
+      <!-- Photo tab -->
+      <div class="tab-panel" id="tab-photo">
+        <div class="api-key-row">
+          <input type="text" id="api-key-input" placeholder="Anthropic API key (sk-ant-...)" />
+          <button class="btn btn-ghost" onclick="saveApiKey()">Save</button>
+        </div>
+        <div class="photo-area" onclick="document.getElementById('photo-file').click()">
+          📷 Tap to take a photo or choose an image of your word list<br>
+          <small style="color:var(--text3); margin-top:6px; display:block">단어 목록 사진 찍기 또는 이미지 선택</small>
+          <img class="photo-preview" id="photo-preview" />
+        </div>
+        <input type="file" id="photo-file" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)" />
+        <button class="btn btn-primary" style="margin-top:10px;width:100%" id="extract-btn" onclick="extractWords()" disabled>Extract Words · 단어 추출</button>
+        <div id="extract-status" style="font-size:13px;color:var(--text2);margin-top:8px;text-align:center"></div>
+        <div class="word-tags" id="photo-word-tags"></div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="panel">
+      <div class="panel-title">Settings · 설정</div>
+      <div class="settings-row">
+        <div>
+          <label>Language · 언어</label>
+          <select id="lang-select" onchange="updateLangVoice()">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="ko-KR">한국어</option>
+            <option value="fr-FR">Français</option>
+            <option value="ja-JP">日本語</option>
+          </select>
+        </div>
+        <div>
+          <label>Speed · 속도</label>
+          <select id="speed-select">
+            <option value="0.5">0.5× Slow</option>
+            <option value="0.75">0.75× </option>
+            <option value="1" selected>1× Normal</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5× Fast</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save list -->
+    <div class="panel">
+      <div class="panel-title">Save this list · 목록 저장</div>
+      <div class="row">
+        <input type="text" id="list-name-input" placeholder='List name, e.g. "Week 3" · 목록 이름' />
+        <button class="btn btn-ghost" onclick="saveList()">Save · 저장</button>
+      </div>
+      <div class="word-count" id="word-count-msg"></div>
+    </div>
+
+    <button class="btn btn-primary btn-lg" id="start-test-btn" onclick="startTest()" disabled>
+      Start Test · 시험 시작 →
+    </button>
+  </div>
+
+  <!-- Test Screen -->
+  <div id="test-screen" class="screen">
+    <div class="test-header">
+      <span class="test-progress" id="test-progress">1 / 10</span>
+      <div class="test-actions">
+        <button class="btn btn-ghost" onclick="askRestart()">↺ Restart</button>
+        <button class="btn btn-ghost" onclick="askQuit()">✕ Quit</button>
+      </div>
+    </div>
+
+    <!-- Inline confirm bar -->
+    <div class="confirm-bar" id="confirm-bar">
+      <p id="confirm-msg"></p>
+      <div class="cbtn">
+        <button class="btn btn-danger" id="confirm-yes-btn">Yes</button>
+        <button class="btn btn-ghost" onclick="cancelConfirm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <div class="word-display">
+      <div class="word-num" id="word-num">Word 1</div>
+      <button class="listen-btn" id="listen-btn" onclick="speakCurrent()">🔊</button>
+      <div class="hint" id="word-hint">Press 🔊 to hear the word · 버튼을 눌러 단어를 들으세요</div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="answer-row">
+      <input type="text" id="answer-input" placeholder="Type the spelling · 스펠링을 입력하세요" onkeydown="handleAnswerKey(event)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="btn btn-primary" id="check-btn" onclick="checkAnswer()">Check →</button>
+    </div>
+    <button class="btn btn-success btn-lg" id="next-btn" onclick="nextWord()">Next word →</button>
+  </div>
+
+  <!-- Results Screen -->
+  <div id="results-screen" class="screen">
+    <div class="panel">
+      <div class="score-big" id="score-big"></div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="result-list" id="result-list"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost btn-lg" onclick="goSetup()">← Back · 다시 설정</button>
+        <button class="btn btn-primary btn-lg" onclick="retryTest()">Retry · 다시 시험</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- State ----
+let words = [];
+let shuffled = [];
+let current = 0;
+let results = [];
+let currentLang = 'en-US';
+let photoImageData = null;
+let confirmAction = null;
+
+// ---- Tab switching ----
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['manual','paste','photo'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach((p, i) => {
+    const names = ['manual','paste','photo'];
+    p.classList.toggle('active', names[i] === name);
+  });
+}
+
+// ---- Word management ----
+function addWord(w) {
+  const input = document.getElementById('word-input');
+  const word = (w || input.value).trim().toLowerCase();
+  if (!word || words.includes(word)) { if (!w) input.value = ''; return; }
+  words.push(word);
+  if (!w) input.value = '';
+  renderTags();
+  updateStartBtn();
+}
+
+function handleWordKey(e) { if (e.key === 'Enter') addWord(); }
+
+function removeWord(w) {
+  words = words.filter(x => x !== w);
+  renderTags();
+  updateStartBtn();
+}
+
+function renderTags() {
+  ['word-tags','paste-word-tags','photo-word-tags'].forEach(id => {
+    document.getElementById(id).innerHTML = words.map(w =>
+      `<span class="tag">${w}<button onclick="removeWord('${w}')" title="Remove">×</button></span>`
+    ).join('');
+  });
+  document.getElementById('word-count-msg').textContent =
+    words.length ? `${words.length} word${words.length>1?'s':''} ready · ${words.length}개 단어 준비됨` : '';
+}
+
+function importPaste() {
+  const raw = document.getElementById('paste-input').value;
+  const imported = raw.split(/[\n,\s]+/).map(w => w.trim().toLowerCase()).filter(Boolean);
+  imported.forEach(w => { if (!words.includes(w)) words.push(w); });
+  document.getElementById('paste-input').value = '';
+  renderTags();
+  updateStartBtn();
+}
+
+function updateStartBtn() {
+  document.getElementById('start-test-btn').disabled = words.length === 0;
+}
+
+// ---- Saved lists ----
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem('spelling_settings') || '{}');
+  if (s.lang) { document.getElementById('lang-select').value = s.lang; currentLang = s.lang; }
+  if (s.speed) document.getElementById('speed-select').value = s.speed;
+  if (s.apiKey) document.getElementById('api-key-input').value = s.apiKey;
+}
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  const s = JSON.parse(localStorage.getItem('spelling_settings') || '{}');
+  s.apiKey = key;
+  localStorage.setItem('spelling_settings', JSON.stringify(s));
+  alert('API key saved! · API 키가 저장되었습니다.');
+}
+
+function updateLangVoice() {
+  currentLang = document.getElementById('lang-select').value;
+}
+
+function saveList() {
+  const name = document.getElementById('list-name-input').value.trim();
+  if (!name) { alert('Please enter a list name. · 목록 이름을 입력하세요.'); return; }
+  if (words.length === 0) { alert('No words to save. · 저장할 단어가 없습니다.'); return; }
+  const lists = JSON.parse(localStorage.getItem('spelling_lists') || '{}');
+  lists[name] = {
+    words: [...words],
+    lang: document.getElementById('lang-select').value,
+    speed: document.getElementById('speed-select').value
+  };
+  localStorage.setItem('spelling_lists', JSON.stringify(lists));
+  document.getElementById('list-name-input').value = '';
+  renderListsBar();
+  alert(`"${name}" saved! · 저장되었습니다!`);
+}
+
+function renderListsBar() {
+  const lists = JSON.parse(localStorage.getItem('spelling_lists') || '{}');
+  const keys = Object.keys(lists);
+  const panel = document.getElementById('saved-lists-panel');
+  const bar = document.getElementById('saved-lists-bar');
+  panel.style.display = keys.length ? 'block' : 'none';
+  bar.innerHTML = keys.map(name =>
+    `<span class="list-chip" onclick="loadList('${name}')">
+      ${name}
+      <span class="list-chip-del" onclick="deleteList(event,'${name}')">×</span>
+    </span>`
+  ).join('');
+}
+
+function loadList(name) {
+  const lists = JSON.parse(localStorage.getItem('spelling_lists') || '{}');
+  const list = lists[name];
+  if (!list) return;
+  words = [...list.words];
+  document.getElementById('lang-select').value = list.lang || 'en-US';
+  document.getElementById('speed-select').value = list.speed || '1';
+  currentLang = list.lang || 'en-US';
+  renderTags();
+  updateStartBtn();
+  document.querySelectorAll('.list-chip').forEach(c =>
+    c.classList.toggle('active', c.textContent.trim().startsWith(name))
+  );
+}
+
+function deleteList(e, name) {
+  e.stopPropagation();
+  if (!confirm(`Delete "${name}"? · "${name}" 삭제할까요?`)) return;
+  const lists = JSON.parse(localStorage.getItem('spelling_lists') || '{}');
+  delete lists[name];
+  localStorage.setItem('spelling_lists', JSON.stringify(lists));
+  renderListsBar();
+}
+
+// ---- Photo / OCR ----
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    photoImageData = ev.target.result;
+    const preview = document.getElementById('photo-preview');
+    preview.src = photoImageData;
+    preview.style.display = 'block';
+    document.getElementById('extract-btn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function extractWords() {
+  const apiKey = document.getElementById('api-key-input').value.trim();
+  if (!apiKey) { alert('Please enter your Anthropic API key first. · API 키를 먼저 입력하세요.'); return; }
+  if (!photoImageData) { alert('Please select a photo first. · 사진을 먼저 선택하세요.'); return; }
+  document.getElementById('extract-status').textContent = 'Extracting words... · 단어 추출 중...';
+  document.getElementById('extract-btn').disabled = true;
+  try {
+    const base64 = photoImageData.split(',')[1];
+    const mimeType = photoImageData.split(';')[0].split(':')[1];
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+            { type: 'text', text: 'Extract all spelling words from this image. Return ONLY a JSON array of strings, nothing else. Example: ["apple","banana","cherry"]' }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content[0].text.trim();
+    const extracted = JSON.parse(text.replace(/```json|```/g,'').trim());
+    extracted.forEach(w => { const clean = w.trim().toLowerCase(); if (clean && !words.includes(clean)) words.push(clean); });
+    renderTags();
+    updateStartBtn();
+    document.getElementById('extract-status').textContent = `✓ ${extracted.length} words extracted! · ${extracted.length}개 단어 추출됨`;
+  } catch (err) {
+    document.getElementById('extract-status').textContent = 'Error: ' + (err.message || 'Failed to extract');
+  }
+  document.getElementById('extract-btn').disabled = false;
+}
+
+// ---- Speech ----
+function speak(text, lang, speed) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang || currentLang;
+  utter.rate = parseFloat(speed || document.getElementById('speed-select').value);
+  window.speechSynthesis.speak(utter);
+}
+
+function speakCurrent() {
+  if (shuffled[current]) speak(shuffled[current]);
+}
+
+// ---- Test flow ----
+function startTest() {
+  if (words.length === 0) return;
+  shuffled = [...words].sort(() => Math.random() - 0.5);
+  current = 0; results = [];
+  showScreen('test-screen');
+  loadWord();
+}
+
+function loadWord() {
+  const word = shuffled[current];
+  document.getElementById('test-progress').textContent = `${current+1} / ${shuffled.length}`;
+  document.getElementById('word-num').textContent = `Word ${current+1} · ${current+1}번 단어`;
+  document.getElementById('progress-fill').style.width = `${(current/shuffled.length)*100}%`;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('answer-input').className = '';
+  document.getElementById('answer-input').disabled = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('check-btn').style.display = '';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('word-hint').textContent = 'Press 🔊 to hear the word · 버튼을 눌러 단어를 들으세요';
+  hideConfirm();
+  setTimeout(() => {
+    speak(word);
+    document.getElementById('answer-input').focus();
+  }, 200);
+}
+
+function handleAnswerKey(e) { if (e.key === 'Enter') checkAnswer(); }
+
+function checkAnswer() {
+  const input = document.getElementById('answer-input');
+  const answer = input.value.trim().toLowerCase();
+  if (!answer) return;
+  const word = shuffled[current];
+  const correct = answer === word;
+  results.push({ word, answer, correct });
+  input.className = correct ? 'correct' : 'wrong';
+  input.disabled = true;
+  const fb = document.getElementById('feedback');
+  fb.textContent = correct ? '✓ Correct! · 정답!' : `✗ The correct spelling is: ${word}`;
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  document.getElementById('check-btn').style.display = 'none';
+  const nb = document.getElementById('next-btn');
+  nb.textContent = current+1 < shuffled.length ? 'Next word → · 다음 단어' : 'See results → · 결과 보기';
+  nb.style.display = 'block';
+}
+
+function nextWord() {
+  current++;
+  if (current >= shuffled.length) showResults(); else loadWord();
+}
+
+// ---- Inline confirm ----
+function askRestart() {
+  confirmAction = 'restart';
+  document.getElementById('confirm-msg').textContent = 'Restart the test? · 다시 시작할까요?';
+  document.getElementById('confirm-yes-btn').onclick = doRestart;
+  document.getElementById('confirm-bar').classList.add('show');
+}
+function askQuit() {
+  confirmAction = 'quit';
+  document.getElementById('confirm-msg').textContent = 'Quit and go back to setup? · 설정으로 돌아갈까요?';
+  document.getElementById('confirm-yes-btn').onclick = doQuit;
+  document.getElementById('confirm-bar').classList.add('show');
+}
+function cancelConfirm() { hideConfirm(); }
+function hideConfirm() {
+  document.getElementById('confirm-bar').classList.remove('show');
+  confirmAction = null;
+}
+function doRestart() { hideConfirm(); startTest(); }
+function doQuit() { hideConfirm(); goSetup(); }
+
+// ---- Results ----
+function showResults() {
+  showScreen('results-screen');
+  const score = results.filter(r=>r.correct).length;
+  const total = results.length;
+  const pct = Math.round((score/total)*100);
+  document.getElementById('score-big').textContent = `${score}/${total}`;
+  document.getElementById('score-msg').textContent =
+    pct===100 ? '🎉 Perfect score! Amazing work!' :
+    pct>=80 ? '🌟 Great job! Almost perfect!' :
+    pct>=60 ? '👍 Good effort! Keep practising.' : '💪 Keep going — practice makes perfect!';
+  document.getElementById('result-list').innerHTML = results.map(r =>
+    `<div class="result-item">
+      <span class="ri-icon">${r.correct ? '✅' : '❌'}</span>
+      <span class="ri-word">${r.word}</span>
+      <span class="ri-answer">${r.correct ? 'Correct! · 정답!' : 'You wrote: '+r.answer+' · 입력: '+r.answer}</span>
+    </div>`
+  ).join('');
+}
+
+function retryTest() { startTest(); }
+function goSetup() { showScreen('setup-screen'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ---- Init ----
+loadSettings();
+renderListsBar();
+renderTags();
+updateStartBtn();
+</script>
+</body>
+</html>
